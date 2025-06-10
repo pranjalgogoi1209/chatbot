@@ -1,6 +1,11 @@
 import { useState } from "react";
 import "./chatbot.scss";
+import { SiChatbot } from "react-icons/si";
+import { FaRightLong } from "react-icons/fa6";
 import chatbotFlow from "./../../data/chatbotFlow.js";
+import ChatHeader from "../chatHeader/ChatHeader.jsx";
+import { VscSend } from "react-icons/vsc";
+import logo from "../../../public/logo-01.png";
 
 export default function Chatbot() {
   const [messages, setMessages] = useState([
@@ -83,7 +88,7 @@ export default function Chatbot() {
     const selected = optionObj.option;
     const newMessages = [
       ...messages,
-      { from: "user", text: `${optionObj.number}️⃣ ${selected}` },
+      { from: "user", text: `${optionObj.number}️. ${selected}` },
     ];
     logHistory("user", `${optionObj.number}️⃣ ${selected}`);
 
@@ -164,7 +169,10 @@ export default function Chatbot() {
       newMessages.push({ from: "bot", text: optionObj.subMessage });
 
       if (step === "customSolutions") {
-        newMessages.push({ from: "bot", text: "Our Expert Team will be in touch with you soon!" });
+        newMessages.push({
+          from: "bot",
+          text: "Our Expert Team will be in touch with you soon!",
+        });
         const menuOnlyStep = {
           message: "Would you like to return to the main menu?",
           options: [{ option: "Menu", number: 1 }],
@@ -196,34 +204,69 @@ export default function Chatbot() {
 
   return (
     <div className="chatbot-box">
+      <ChatHeader />
       <div className="chat-window">
         {messages.map((msg, i) => (
-          <div key={i} className={`message ${msg.from}`}>
-            {msg.text}
+          <div
+            className={`flex-row-center ${
+              msg.from === "bot" ? "message-part-bot" : "message-part"
+            }`}
+            key={i}
+          >
+            {msg.from === "bot" && (
+              <div className="flex-col-center chatbot-icon">
+                <SiChatbot />
+              </div>
+            )}
+            <div className={`message ${msg.from}`}>{msg.text}</div>
           </div>
         ))}
       </div>
-
-      {currentStepData?.input && (
-        <div className="input-row">
-          <input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleUserInput(inputValue)}
-          />
-          <button onClick={() => handleUserInput(inputValue)}>Send</button>
-        </div>
-      )}
+      <div className="chat-footer">
+        {currentStepData?.input && (
+          <form className="flex-row-center input-row">
+            <input
+              className="message-input"
+              value={inputValue}
+              placeholder="Type your message here..."
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) =>
+                e.key === "Enter" && handleUserInput(inputValue)
+              }
+            />
+            <VscSend
+              onClick={() => handleUserInput(inputValue)}
+              className="send-icon"
+            />
+          </form>
+        )}
+      </div>
 
       {currentStepData?.options && (
-        <div className="options">
-          {currentStepData.options.map((opt, i) => (
-            <button key={i} onClick={() => handleOptionClick(opt)}>
-              {opt.number}️⃣ {opt.option}
-            </button>
-          ))}
+        <div className="flex-row-center otp-container">
+          <div className="flex-col-center chatbot-icon">
+            <SiChatbot />
+          </div>
+          <div className="flex-col-center options">
+            {currentStepData.options.map((opt, i) => (
+              <div className="flex-row-center opt-bg">
+                <button key={i} onClick={() => handleOptionClick(opt)}>
+                  {opt.number}️. {opt.option}
+                </button>
+                <div className="flex-col-center arrow-icon">
+                  <FaRightLong />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
+
+      <div className="flex-row-center poweredBy">
+        <p className="powerTxt">Powered by </p>
+        <img alt="techkilla" src={logo} className="logopower" />
+        <p className="powerTxt">Techkilla.</p>
+      </div>
     </div>
   );
 }
