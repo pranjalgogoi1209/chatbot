@@ -110,6 +110,11 @@ export default function Chatbot() {
     ];
     logHistory("user", `${optionObj.number}️⃣ ${selected}`);
 
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+    }, 2000);
+
     if (step === "mainMenu") {
       // main menu
       updateUserData({ interest: selected });
@@ -145,7 +150,8 @@ export default function Chatbot() {
           message: "Would you like to return to the main menu?",
           options: [{ option: "Menu", number: 1 }],
         };
-        newMessages.push({ from: "bot", text: menuOnlyStep.message });
+        // newMessages.push({ from: "bot", text: menuOnlyStep.message });
+        newMessages[newMessages.length - 1].subText = menuOnlyStep.message;
         logHistory("bot", menuOnlyStep.message);
         setCurrentStepData(menuOnlyStep);
         setMessages(newMessages);
@@ -153,7 +159,8 @@ export default function Chatbot() {
       } else {
         setCurrentStepData(botStep);
         if (botStep?.message) {
-          newMessages.push({ from: "bot", text: botStep.message });
+          // newMessages.push({ from: "bot", text: botStep.message });
+          newMessages[newMessages.length - 1].subText = botStep.message;
           logHistory("bot", botStep.message);
         }
 
@@ -174,7 +181,8 @@ export default function Chatbot() {
           message: "Would you like to return to the main menu?",
           options: [{ option: "Menu", number: 1 }],
         };
-        newMessages.push({ from: "bot", text: menuOnlyStep.message });
+        // newMessages.push({ from: "bot", text: menuOnlyStep.message });
+        newMessages[newMessages.length - 1].subText = menuOnlyStep.message;
         setCurrentStepData(menuOnlyStep);
         setMessages(newMessages);
       }
@@ -219,6 +227,9 @@ export default function Chatbot() {
   };
 
   console.log(userData);
+  console.log("MEssage", messages);
+
+  console.log("Current step", currentStepData);
 
   return (
     <div className="chatbot-box">
@@ -246,6 +257,10 @@ export default function Chatbot() {
               <div className={`message ${msg.from}`}>{msg.text}</div>
             )}
 
+            {!typing && msg?.subText && (
+              <div className={`message ${msg.from}`}>{msg.subText}</div>
+            )}
+
             {msg.from === "user" && (
               <div className="flex-col-center user-icon">
                 <TiUser />
@@ -260,13 +275,7 @@ export default function Chatbot() {
               <SiChatbot />
             </div>
             <div className="flex-col-center options">
-              {typing ? (
-                <p className="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </p>
-              ) : (
+              {!typing &&
                 currentStepData.options.map((opt, i) => (
                   <div
                     key={i}
@@ -280,8 +289,7 @@ export default function Chatbot() {
                       <FaRightLong />
                     </div>
                   </div>
-                ))
-              )}
+                ))}
             </div>
           </div>
         )}
