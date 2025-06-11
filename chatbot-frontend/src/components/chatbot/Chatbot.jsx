@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./chatbot.scss";
 import { SiChatbot } from "react-icons/si";
 import { FaRightLong } from "react-icons/fa6";
+import { TiUser } from "react-icons/ti";
 import chatbotFlow from "./../../data/chatbotFlow.js";
 import ChatHeader from "../chatHeader/ChatHeader.jsx";
 import { VscSend } from "react-icons/vsc";
-import logo from "../../../public/logo-01.png";
+import logo from "../../assets/logo-01.png";
 
 export default function Chatbot() {
   const [messages, setMessages] = useState([
@@ -15,6 +16,7 @@ export default function Chatbot() {
   const [currentStepData, setCurrentStepData] = useState(chatbotFlow["start"]);
   const [inputValue, setInputValue] = useState("");
   const [selectedOptionData, setSelectedOptionData] = useState({});
+  const [typing, setTyping] = useState(false);
 
   const [userData, setUserData] = useState({
     name: "",
@@ -24,6 +26,17 @@ export default function Chatbot() {
     lastAction: "",
     history: [],
   });
+
+  const chatWindowRef = useRef(null);
+
+  useEffect(() => {
+    if (chatWindowRef.current) {
+      chatWindowRef.current.scrollTo({
+        top: chatWindowRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
 
   const updateUserData = (data) => {
     setUserData((prev) => ({ ...prev, ...data }));
@@ -53,6 +66,11 @@ export default function Chatbot() {
   const handleUserInput = (input) => {
     const newMessages = [...messages, { from: "user", text: input }];
     logHistory("user", input);
+
+    setTyping(true);
+    setTimeout(() => {
+      setTyping(false);
+    }, 2000);
 
     if (step === "start") {
       updateUserData({ name: input });
@@ -205,7 +223,7 @@ export default function Chatbot() {
   return (
     <div className="chatbot-box">
       <ChatHeader />
-      <div className="chat-window">
+      <div className="chat-window" ref={chatWindowRef}>
         {messages.map((msg, i) => (
           <div
             className={`flex-row-center ${
@@ -218,13 +236,60 @@ export default function Chatbot() {
                 <SiChatbot />
               </div>
             )}
-            <div className={`message ${msg.from}`}>{msg.text}</div>
+            {typing && msg.from === "bot" && i === messages.length - 1 ? (
+              <p className="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </p>
+            ) : (
+              <div className={`message ${msg.from}`}>{msg.text}</div>
+            )}
+
+            {msg.from === "user" && (
+              <div className="flex-col-center user-icon">
+                <TiUser />
+              </div>
+            )}
           </div>
         ))}
+
+        {currentStepData?.options && (
+          <div className="flex-row-center otp-container">
+            <div className="flex-col-center chatbot-icon">
+              <SiChatbot />
+            </div>
+            <div className="flex-col-center options">
+              {typing ? (
+                <p className="typing-indicator">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </p>
+              ) : (
+                currentStepData.options.map((opt, i) => (
+                  <div
+                    key={i}
+                    className="flex-row-center opt-bg"
+                    onClick={() => handleOptionClick(opt)}
+                  >
+                    <button>
+                      {opt.number}. {opt.option}
+                    </button>
+                    <div className="flex-col-center arrow-icon">
+                      <FaRightLong />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
       <div className="chat-footer">
         {currentStepData?.input && (
-          <form className="flex-row-center input-row">
+          <div className="flex-row-center input-row">
             <input
               className="message-input"
               value={inputValue}
@@ -238,29 +303,9 @@ export default function Chatbot() {
               onClick={() => handleUserInput(inputValue)}
               className="send-icon"
             />
-          </form>
+          </div>
         )}
       </div>
-
-      {currentStepData?.options && (
-        <div className="flex-row-center otp-container">
-          <div className="flex-col-center chatbot-icon">
-            <SiChatbot />
-          </div>
-          <div className="flex-col-center options">
-            {currentStepData.options.map((opt, i) => (
-              <div className="flex-row-center opt-bg">
-                <button key={i} onClick={() => handleOptionClick(opt)}>
-                  {opt.number}️. {opt.option}
-                </button>
-                <div className="flex-col-center arrow-icon">
-                  <FaRightLong />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="flex-row-center poweredBy">
         <p className="powerTxt">Powered by </p>

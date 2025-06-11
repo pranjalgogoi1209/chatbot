@@ -5,7 +5,7 @@ const chatbotFlow = {
     next: "getCompany",
   },
   getCompany: (name) => ({
-    message: `Thanks, ${name}! 🙌 Which company are you representing?`,
+    message: `Thanks, ${name}! Register your contact number. `,
     input: true,
     next: "mainMenu",
   }),
